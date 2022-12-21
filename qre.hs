@@ -24,7 +24,7 @@ data QRE a b = Empty b | Atom a b
 
 compile :: QRE Char Int -> CRA
 compile (Empty v) = let theta  = Data.Map.fromList [("x", v)]
-                        thetaS = (\_ _ -> Data.Map.fromList [("x", v)]) -- To conform with the interface, I should unify these things
+                        thetaS = (\_ rs -> Data.Map.fromList [("x", v)]) -- To conform with the interface, I should unify these things
                         delta  = Data.Map.fromList [(("p", '*'), (thetaS, "q")),
                                                     (("q", '*'), (thetaS, "q"))]
                         init   = (\s -> case s of
@@ -57,7 +57,7 @@ compile (Empty v) = let theta  = Data.Map.fromList [("x", v)]
 -}     
 
 compile (Atom t v) = let theta  = Data.Map.fromList [("x", v)]
-                         thetaS = (\(t, v) rs -> (adjust (\x -> x) "x" rs))
+                         thetaS = (\v rs -> (adjust (\x -> x) "x" rs))
                          delta  = Data.Map.fromList [(("p", t  ), (thetaS, "q")),
                                                      (("p", '*'), (thetaS, "p")),
                                                      (("q", t  ), (thetaS, "q")),

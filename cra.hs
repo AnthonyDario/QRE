@@ -23,7 +23,7 @@ type State      = String
 type Register   = String
 type Registers  = Map Register Int
 type Tag        = (Char, Int)
-type RegUpdate  = Tag -> Registers ->  Registers
+type RegUpdate  = Int -> Registers ->  Registers
 data Expression = Const Int | Var String | Op 
 
 type Delta = Map (State, Char) (RegUpdate, State)
@@ -43,9 +43,9 @@ output :: CRA -> State -> Registers -> Maybe Int
 output (_, _, f) s rs = f s rs
 
 -- Update the CRA to a new state and registers
-update :: CRA -> State -> Registers -> (Char, Int) -> (State, Registers)
-update (d, _, _) s rs e@(tag, _) = case d ! (s, tag) of 
-                                        (theta, s') -> (s', theta e rs)
+update :: CRA -> State -> Registers -> Tag -> (State, Registers)
+update (d, _, _) s rs (label, val) = case d ! (s, label) of 
+                                          (theta, s') -> (s', theta val rs)
 
 {-
     Running a CRA:

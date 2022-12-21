@@ -40,8 +40,8 @@ import QRE
 -}
 cra3 :: CRA
 cra3 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
-           thetaA = (\(t, v) rs -> (adjust (\x -> x + v) "x" rs))
-           thetaB = (\(t, v) rs -> (adjust (\y -> y + v) "y" rs))
+           thetaA = (\v rs -> (adjust (\x -> x + v) "x" rs))
+           thetaB = (\v rs -> (adjust (\y -> y + v) "y" rs))
            delta  = Data.Map.fromList [(("p",  'a'), (thetaA, "qa")),
                                        (("p",  'b'), (thetaB, "qb")),
                                        (("qa", 'a'), (thetaA, "qa")),
@@ -76,9 +76,9 @@ cra3 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
 
 -}
 cra5 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
-           thetaA = (\(_, v) rs -> (adjust (\x -> x + v) "x" rs))
-           thetaH = (\(t, v) rs -> (adjust (\x -> 0) "x" 
-                                           (adjust (\_ -> max (rs ! "x") (rs ! "y")) "y" rs)))
+           thetaA = (\v rs -> (adjust (\x -> x + v) "x" rs))
+           thetaH = (\v rs -> (adjust (\x -> 0) "x" 
+                                      (adjust (\_ -> max (rs ! "x") (rs ! "y")) "y" rs)))
            delta  = Data.Map.fromList [(("p", 'a'), (thetaA, "q")),
                                        (("q", 'a'), (thetaA, "q")),
                                        (("q", '#'), (thetaH, "p"))]
