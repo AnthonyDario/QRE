@@ -8,20 +8,46 @@ import qualified Data.Map (toList, fromList)
 -- Project Files
 import CRA
 
-data QRE a b = Atom a b
+data QRE a b = Empty b | Atom a b
 
 {-
-    Atom (a, 5) : Returns 5 when the tag is 'a'
+    empty(5): Matches on the empty stream and returns 5
 
-          */@*
+        +-----+         +-----+
+     @  |     |  * | @  |     |---+
+    --->| p|x |-------->|  q  |   | * | @  
+        |     |         |     |<--+
+        +-----+         +-----+
+    
+    @ = x := 5
+-}
+
+compile :: QRE Char Int -> CRA
+compile (Empty v) = let theta  = Data.Map.fromList [("x", v)]
+                        thetaS = (\_ _ -> Data.Map.fromList [("x", v)]) -- To conform with the interface, I should unify these things
+                        delta  = Data.Map.fromList [(("p", '*'), (thetaS, "q")),
+                                                    (("q", '*'), (thetaS, "q"))]
+                        init   = (\s -> case s of
+                                             "p" -> theta
+                                             _   -> throw InvalidState)
+                        final  = (\s rs -> case s of
+                                                "p" -> Just (rs ! "x")
+                                                _   -> Nothing)
+                    in
+                        (delta, init, final)
+
+{-
+    Atom(a, 5) : Returns 5 when the tag is 'a'
+
+         * | @*
          /---\
          |   |
          |   v         
-        +-----+  a/@*  +-----+
+        +-----+ a | @* +-----+
      @  |     |------->|     |---+
-    --->|  p  |        | q|x |   | a/@*   
+    --->|  p  |        | q|x |   | a | @* 
         |     |<-------|     |<--+
-        +-----+  */@*  +-----+
+        +-----+ * | @* +-----+
 
     Where @ represents register update functions (theta) and * represents any
     character not 'a' in the alphabet (sigma).
@@ -30,7 +56,6 @@ data QRE a b = Atom a b
     @* = x := x
 -}     
 
-compile :: QRE Char Int -> CRA
 compile (Atom t v) = let theta  = Data.Map.fromList [("x", v)]
                          thetaS = (\(t, v) rs -> (adjust (\x -> x) "x" rs))
                          delta  = Data.Map.fromList [(("p", t  ), (thetaS, "q")),
@@ -45,4 +70,3 @@ compile (Atom t v) = let theta  = Data.Map.fromList [("x", v)]
                                                  _   -> Nothing)
                          in
                             (delta, init, final)
-

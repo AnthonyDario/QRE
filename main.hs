@@ -92,6 +92,18 @@ cra5 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
            (delta, init, final)
 
 main = do
-    print (run cra3 "p" [('a', 4), ('a', 5), ('b', 10), ('a', 3), ('b', 4)])
-    print (run cra5 "p" [('a', 2), ('a', 4), ('#', 8), ('a', 1), ('a', 1), ('a', 2), ('#', 1)])
-    print (run (compile (Atom 'a' 5)) "p" [('a', 10), ('a', 10)])
+
+    -- CRA tests (Examples from Streamable Regular Transductions)
+    putStr ("\nCRA tests -----\n")
+    print  (run cra3 "p" [('a', 4), ('a', 5), ('b', 10), ('a', 3), ('b', 4)])
+    print  (run cra5 "p" [('a', 2), ('a', 4), ('#', 8), ('a', 1), ('a', 1), ('a', 2), ('#', 1)])
+
+    -- Atom tests
+    putStr ("\nAtom tests ----\n")
+    print  (run (compile (Atom 'a' 5)) "p" [('a', 10), ('a', 10)]) -- Atom matches on single elements items
+    print  (run (compile (Atom 'a' 5)) "p" [('a', 10), ('*', 10)]) -- Atom matches on single elements items
+
+    -- Empty tests
+    putStr ("\nEmpty tests ----\n")
+    print  (run (compile (Empty 5)) "p" [])          -- Empty matches an empty stream
+    print  (run (compile (Empty 5)) "p" [('*', 10)]) -- Empty doesn't match a wildcard
