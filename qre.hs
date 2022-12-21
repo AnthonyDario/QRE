@@ -27,9 +27,7 @@ compile (Empty v) = let theta  = Data.Map.fromList [("x", v)]
                         thetaS = (\_ rs -> Data.Map.fromList [("x", v)]) -- To conform with the interface, I should unify these things
                         delta  = Data.Map.fromList [(("p", Wildcard), (thetaS, "q")),
                                                     (("q", Wildcard), (thetaS, "q"))]
-                        init   = (\s -> case s of
-                                             "p" -> theta
-                                             _   -> throw (InvalidState ("Invalid start state: " ++ s)))
+                        init   = ("p", theta)
                         final  = (\s rs -> case s of
                                                 "p" -> Just (rs ! "x")
                                                 _   -> Nothing)
@@ -62,9 +60,7 @@ compile (Atom t v) = let theta  = Data.Map.fromList [("x", v)]
                                                      (("p", Wildcard), (thetaS, "p")),
                                                      (("q", Tag t  ), (thetaS, "q")),
                                                      (("q", Wildcard), (thetaS, "p"))]
-                         init   = (\s -> case s of
-                                              "p" -> theta
-                                              _   -> throw (InvalidState ("Invalid start state: " ++ s)))
+                         init   = ("p", theta)
                          final  = (\s rs -> case s of
                                                  "q" -> Just (rs ! "x")
                                                  _   -> Nothing)

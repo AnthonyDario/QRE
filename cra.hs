@@ -24,14 +24,13 @@ type Element    = (Label, Int)
 type RegUpdate  = Int -> Registers ->  Registers
 data Expression = Const Int | Var String | Op 
 
-type Delta = Map (State, Label) (RegUpdate, State)
-type I     = State -> Registers
-type F     = State -> Registers -> Maybe Int
+type Delta = Map (State, Label) (RegUpdate, State) -- Transition function
+type I     = (State, Registers)                    -- Initialization function
+type F     = State -> Registers -> Maybe Int       -- Finalization (lifting) function
 
 type CRA = (Delta, I, F)
 
 instance Show F         where show _ = "F"
-instance Show I         where show _ = "I"
 instance Show RegUpdate where show _ = "RegUpdate"
 
 {-
@@ -66,8 +65,9 @@ update (d, _, _) s rs e@(label, val) = case Data.Map.lookup (s, label) d of
     The inner function will execute the state machine a character at a time
 -}
 
-run :: CRA -> State -> [Element] -> Maybe Int
-run cra@(_, i, _) s w = runInternal cra s (i s) w
+run :: CRA -> [Element] -> Maybe Int
+run cra@(_, i, _) w = runInternal cra init rs w
+                      where (init, rs) = i
 
 runInternal :: CRA -> State -> Registers -> [Element] -> Maybe Int
 runInternal cra s rs []     = output cra s rs

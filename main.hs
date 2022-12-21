@@ -48,9 +48,7 @@ cra3 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
                                        (("qa", Tag 'b'), (thetaB, "qb")),
                                        (("qb", Tag 'a'), (thetaA, "qa")),
                                        (("qb", Tag 'b'), (thetaB, "qb"))]
-           init   = (\s -> case s of 
-                                "p" -> theta
-                                _   -> throw (InvalidState ("Invalid start state: " ++ s)))
+           init   = ("p", theta)
            final  = (\s rs -> case s of
                                    "qa" -> Just (rs ! "x")
                                    "qb" -> Just (rs ! "y")
@@ -82,9 +80,7 @@ cra5 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
            delta  = Data.Map.fromList [(("p", Tag 'a'), (thetaA, "q")),
                                        (("q", Tag 'a'), (thetaA, "q")),
                                        (("q", Tag '#'), (thetaH, "p"))]
-           init   = (\s -> case s of
-                                "p" -> theta
-                                _   -> throw (InvalidState ("Invalid start state: " ++ s)))
+           init   = ("p", theta) 
            final  = (\s rs -> case s of
                                    "p" -> Just (rs ! "y")
                                    _   -> Nothing)
@@ -93,20 +89,22 @@ cra5 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
 
 main = do
 
+    let asbs   = toStream [('a', 4), ('a', 5), ('b', 10), ('a', 3), ('b', 4)]
+    let blocks = toStream [('a', 2), ('a', 4), ('#', 8), ('a', 1), ('a', 1), ('a', 2), ('#', 1)]
+    let as     = toStream [('a', 10), ('a', 10)] 
+    let wilds  = toStream [('a', 10), ('i', 10)]
+
     -- CRA tests (Examples from Streamable Regular Transductions)
     putStr ("\nCRA tests -----\n")
-    print  (run cra3 "p" (toStream [('a', 4), ('a', 5), ('b', 10), ('a', 3), ('b', 4)]))
-    print  (run cra5 "p" (toStream [('a', 2), ('a', 4), ('#', 8), ('a', 1), ('a', 1), ('a', 2), ('#', 1)]))
+    print  (run cra3 asbs)
+    print  (run cra5 blocks)
 
     -- Atom tests
     putStr ("\nAtom tests ----\n")
-    print  (run (compile (Atom 'a' 5)) "p" 
-                (toStream [('a', 10), ('a', 10)])) -- Atom matches on single elements items
-    print  (run (compile (Atom 'a' 5)) "p" 
-                (toStream [('a', 10), ('i', 10)])) -- Atom doesn't match anything else
+    print  (run (compile (Atom 'a' 5)) as)    -- Atom matches on single elements items
+    print  (run (compile (Atom 'a' 5)) wilds) -- Atom doesn't match anything else
 
     -- Empty tests
     putStr ("\nEmpty tests ----\n")
-    print  (run (compile (Empty 5)) "p" (toStream []))         -- Empty matches an empty stream
-    print  (run (compile (Empty 5)) "p" (toStream[('*', 10)])) -- Empty doesn't match a wildcard
-    print  (run (compile (Empty 5)) "p" (toStream[('7', 10)])) -- Empty doesn't match a anything
+    print  (run (compile (Empty 5)) (toStream [])) -- Empty matches an empty stream
+    print  (run (compile (Empty 5)) wilds)         -- Empty doesn't match a wildcard
