@@ -31,9 +31,7 @@ data QRE a b = Atom a b
 -}     
 
 compile :: QRE Char Int -> CRA
-compile (Atom t v) = let states = ["p", "q"]
-                         tags   = [t]
-                         theta  = Data.Map.fromList [("x", v)]
+compile (Atom t v) = let theta  = Data.Map.fromList [("x", v)]
                          thetaS = (\(t, v) rs -> (adjust (\x -> x) "x" rs))
                          delta  = Data.Map.fromList [(("p", t  ), (thetaS, "q")),
                                                      (("p", '*'), (thetaS, "p")),
@@ -46,5 +44,5 @@ compile (Atom t v) = let states = ["p", "q"]
                                                  "q" -> Just (rs ! "x")
                                                  _   -> Nothing)
                          in
-                            (states, init "p", delta, init, final)
+                            (delta, init, final)
 

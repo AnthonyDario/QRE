@@ -20,9 +20,7 @@ import QRE
 
 -}
 cra3 :: CRA
-cra3 = let states = ["p", "qa", "qb"] -- Currently unused...
-           tags   = ['a', 'b']        -- Also unused...
-           theta  = Data.Map.fromList [("x", 0), ("y", 0)]
+cra3 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
            thetaA = (\(t, v) rs -> (adjust (\x -> x + v) "x" rs))
            thetaB = (\(t, v) rs -> (adjust (\y -> y + v) "y" rs))
            delta  = Data.Map.fromList [(("p",  'a'), (thetaA, "qa")),
@@ -39,7 +37,7 @@ cra3 = let states = ["p", "qa", "qb"] -- Currently unused...
                                    "qb" -> Just (rs ! "y")
                                    _    -> Nothing)
         in
-           (states, init "p", delta, init, final)
+           (delta, init, final)
 
 {- 
     Example 5 
@@ -47,9 +45,7 @@ cra3 = let states = ["p", "qa", "qb"] -- Currently unused...
     A copyless DCRA.  The rate is (a+#)*.  Outputs the block with the maximum
     sum, where a block is a series of a's separated by a #.
 -}
-cra5 = let states = ["p", "q"]
-           tags   = ['a', '#']
-           theta  = Data.Map.fromList [("x", 0), ("y", 0)]
+cra5 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
            thetaA = (\(_, v) rs -> (adjust (\x -> x + v) "x" rs))
            thetaH = (\(t, v) rs -> (adjust (\x -> 0) "x" 
                                            (adjust (\_ -> max (rs ! "x") (rs ! "y")) "y" rs)))
@@ -63,7 +59,7 @@ cra5 = let states = ["p", "q"]
                                    "p" -> Just (rs ! "y")
                                    _   -> Nothing)
        in
-           (states, init "p", delta, init, final)
+           (delta, init, final)
 
 main = do
     print (run cra3 "p" [('a', 4), ('a', 5), ('b', 10), ('a', 3), ('b', 4)])

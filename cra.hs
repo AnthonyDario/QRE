@@ -26,13 +26,11 @@ type Tag        = (Char, Int)
 type RegUpdate  = Tag -> Registers ->  Registers
 data Expression = Const Int | Var String | Op 
 
-type Q     = [State]
-type X     = Registers
 type Delta = Map (State, Char) (RegUpdate, State)
 type I     = State -> Registers
 type F     = State -> Registers -> Maybe Int
 
-type CRA = (Q, X, Delta, I, F)
+type CRA = (Delta, I, F)
 
 instance Show F where show _ = "F"
 instance Show I where show _ = "I"
@@ -42,12 +40,12 @@ instance Show RegUpdate where show _ = "RegUpdate"
 
 -- Call the finalization function on a state
 output :: CRA -> State -> Registers -> Maybe Int
-output (_, _, _, _, f) s rs = f s rs
+output (_, _, f) s rs = f s rs
 
 -- Update the CRA to a new state and registers
 update :: CRA -> State -> Registers -> (Char, Int) -> (State, Registers)
-update (_, _, d, _, _) s rs e@(tag, _) = case d ! (s, tag) of 
-                                              (theta, s') -> (s', theta e rs)
+update (d, _, _) s rs e@(tag, _) = case d ! (s, tag) of 
+                                        (theta, s') -> (s', theta e rs)
 
 {-
     Running a CRA:
@@ -59,7 +57,7 @@ update (_, _, d, _, _) s rs e@(tag, _) = case d ! (s, tag) of
 -}
 
 run :: CRA -> State -> [Tag] -> Maybe Int
-run cra@(_, _, _, i, _) s w = runInternal cra s (i s) w
+run cra@(_, i, _) s w = runInternal cra s (i s) w
 
 runInternal :: CRA -> State -> Registers -> [Tag] -> Maybe Int
 runInternal cra s rs []     = output cra s rs
