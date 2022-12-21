@@ -25,11 +25,11 @@ data QRE a b = Empty b | Atom a b
 compile :: QRE Char Int -> CRA
 compile (Empty v) = let theta  = Data.Map.fromList [("x", v)]
                         thetaS = (\_ rs -> Data.Map.fromList [("x", v)]) -- To conform with the interface, I should unify these things
-                        delta  = Data.Map.fromList [(("p", '*'), (thetaS, "q")),
-                                                    (("q", '*'), (thetaS, "q"))]
+                        delta  = Data.Map.fromList [(("p", Wildcard), (thetaS, "q")),
+                                                    (("q", Wildcard), (thetaS, "q"))]
                         init   = (\s -> case s of
                                              "p" -> theta
-                                             _   -> throw InvalidState)
+                                             _   -> throw (InvalidState ("Invalid start state: " ++ s)))
                         final  = (\s rs -> case s of
                                                 "p" -> Just (rs ! "x")
                                                 _   -> Nothing)
@@ -58,13 +58,13 @@ compile (Empty v) = let theta  = Data.Map.fromList [("x", v)]
 
 compile (Atom t v) = let theta  = Data.Map.fromList [("x", v)]
                          thetaS = (\v rs -> (adjust (\x -> x) "x" rs))
-                         delta  = Data.Map.fromList [(("p", t  ), (thetaS, "q")),
-                                                     (("p", '*'), (thetaS, "p")),
-                                                     (("q", t  ), (thetaS, "q")),
-                                                     (("q", '*'), (thetaS, "p"))]
+                         delta  = Data.Map.fromList [(("p", Tag t  ), (thetaS, "q")),
+                                                     (("p", Wildcard), (thetaS, "p")),
+                                                     (("q", Tag t  ), (thetaS, "q")),
+                                                     (("q", Wildcard), (thetaS, "p"))]
                          init   = (\s -> case s of
                                               "p" -> theta
-                                              _   -> throw InvalidState)
+                                              _   -> throw (InvalidState ("Invalid start state: " ++ s)))
                          final  = (\s rs -> case s of
                                                  "q" -> Just (rs ! "x")
                                                  _   -> Nothing)

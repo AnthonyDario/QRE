@@ -42,15 +42,15 @@ cra3 :: CRA
 cra3 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
            thetaA = (\v rs -> (adjust (\x -> x + v) "x" rs))
            thetaB = (\v rs -> (adjust (\y -> y + v) "y" rs))
-           delta  = Data.Map.fromList [(("p",  'a'), (thetaA, "qa")),
-                                       (("p",  'b'), (thetaB, "qb")),
-                                       (("qa", 'a'), (thetaA, "qa")),
-                                       (("qa", 'b'), (thetaB, "qb")),
-                                       (("qb", 'a'), (thetaA, "qa")),
-                                       (("qb", 'b'), (thetaB, "qb"))]
+           delta  = Data.Map.fromList [(("p",  Tag 'a'), (thetaA, "qa")),
+                                       (("p",  Tag 'b'), (thetaB, "qb")),
+                                       (("qa", Tag 'a'), (thetaA, "qa")),
+                                       (("qa", Tag 'b'), (thetaB, "qb")),
+                                       (("qb", Tag 'a'), (thetaA, "qa")),
+                                       (("qb", Tag 'b'), (thetaB, "qb"))]
            init   = (\s -> case s of 
                                 "p" -> theta
-                                _   -> throw InvalidState)
+                                _   -> throw (InvalidState ("Invalid start state: " ++ s)))
            final  = (\s rs -> case s of
                                    "qa" -> Just (rs ! "x")
                                    "qb" -> Just (rs ! "y")
@@ -79,12 +79,12 @@ cra5 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
            thetaA = (\v rs -> (adjust (\x -> x + v) "x" rs))
            thetaH = (\v rs -> (adjust (\x -> 0) "x" 
                                       (adjust (\_ -> max (rs ! "x") (rs ! "y")) "y" rs)))
-           delta  = Data.Map.fromList [(("p", 'a'), (thetaA, "q")),
-                                       (("q", 'a'), (thetaA, "q")),
-                                       (("q", '#'), (thetaH, "p"))]
+           delta  = Data.Map.fromList [(("p", Tag 'a'), (thetaA, "q")),
+                                       (("q", Tag 'a'), (thetaA, "q")),
+                                       (("q", Tag '#'), (thetaH, "p"))]
            init   = (\s -> case s of
                                 "p" -> theta
-                                _   -> throw InvalidState)
+                                _   -> throw (InvalidState ("Invalid start state: " ++ s)))
            final  = (\s rs -> case s of
                                    "p" -> Just (rs ! "y")
                                    _   -> Nothing)
@@ -95,15 +95,18 @@ main = do
 
     -- CRA tests (Examples from Streamable Regular Transductions)
     putStr ("\nCRA tests -----\n")
-    print  (run cra3 "p" [('a', 4), ('a', 5), ('b', 10), ('a', 3), ('b', 4)])
-    print  (run cra5 "p" [('a', 2), ('a', 4), ('#', 8), ('a', 1), ('a', 1), ('a', 2), ('#', 1)])
+    print  (run cra3 "p" (toStream [('a', 4), ('a', 5), ('b', 10), ('a', 3), ('b', 4)]))
+    print  (run cra5 "p" (toStream [('a', 2), ('a', 4), ('#', 8), ('a', 1), ('a', 1), ('a', 2), ('#', 1)]))
 
     -- Atom tests
     putStr ("\nAtom tests ----\n")
-    print  (run (compile (Atom 'a' 5)) "p" [('a', 10), ('a', 10)]) -- Atom matches on single elements items
-    print  (run (compile (Atom 'a' 5)) "p" [('a', 10), ('*', 10)]) -- Atom matches on single elements items
+    print  (run (compile (Atom 'a' 5)) "p" 
+                (toStream [('a', 10), ('a', 10)])) -- Atom matches on single elements items
+    print  (run (compile (Atom 'a' 5)) "p" 
+                (toStream [('a', 10), ('i', 10)])) -- Atom doesn't match anything else
 
     -- Empty tests
     putStr ("\nEmpty tests ----\n")
-    print  (run (compile (Empty 5)) "p" [])          -- Empty matches an empty stream
-    print  (run (compile (Empty 5)) "p" [('*', 10)]) -- Empty doesn't match a wildcard
+    print  (run (compile (Empty 5)) "p" (toStream []))         -- Empty matches an empty stream
+    print  (run (compile (Empty 5)) "p" (toStream[('*', 10)])) -- Empty doesn't match a wildcard
+    print  (run (compile (Empty 5)) "p" (toStream[('7', 10)])) -- Empty doesn't match a anything
