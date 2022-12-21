@@ -18,6 +18,25 @@ import QRE
     A copyless DCRA.  Outputs the sum of all values labelled with the label of
     the last seen element
 
+                                    |
+                                    | @
+                                    v
+                                 +------+
+                       a | @a    |      |    b | @b
+                    +------------|  p   |------------+
+                    |            |      |            |
+                    |            +------+            |
+                    v                                v
+                +------+          b | @b          +------+
+           /--->|      |------------------------->|      |----\
+    a | @a |    | qa|x |                          | qb|y |    | b | @b
+           \----|      |<-------------------------|      |<---/
+                +------+          a | @a          +------+
+
+         | x := 0                | x := x + 1             | x := x
+    @ = <|                 @a = <|                  @b = <|
+         | y := 0                | y := y                 | y := y + 1
+
 -}
 cra3 :: CRA
 cra3 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
@@ -44,6 +63,17 @@ cra3 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
     
     A copyless DCRA.  The rate is (a+#)*.  Outputs the block with the maximum
     sum, where a block is a series of a's separated by a #.
+
+         +------+          a | @a          +------+
+      @  |      |------------------------->|      |----\
+    ---->| p|y  |                          |  q   |    | a | @a
+         |      |<-------------------------|      |<---/
+         +------+          # | @#          +------+
+
+         | x := 0                | x := x + val           | x := 0
+    @ = <|                 @a = <|                  @b = <|
+         | y := 0                | y := y                 | y := max(y, x)
+
 -}
 cra5 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
            thetaA = (\(_, v) rs -> (adjust (\x -> x + v) "x" rs))
