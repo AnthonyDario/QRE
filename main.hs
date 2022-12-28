@@ -38,7 +38,7 @@ import QRE
          | y := 0                | y := y                 | y := y + 1
 
 -}
-cra3 :: CRA
+cra3 :: CRA Char Int
 cra3 = let theta  = Data.Map.fromList [("x", 0), ("y", 0)]
            thetaA = (\v rs -> (adjust (\x -> x + v) "x" rs))
            thetaB = (\v rs -> (adjust (\y -> y + v) "y" rs))

@@ -13,16 +13,16 @@ data QRE a b = Empty b | Atom a b
 {-
     empty(5): Matches on the empty stream and returns 5
 
-        +-----+         +-----+
-     @  |     |  * | @  |     |---+
-    --->| p|x |-------->|  q  |   | * | @  
-        |     |         |     |<--+
-        +-----+         +-----+
+        +------+         +------+
+     @  |      |  * | @  |      |---+
+    --->| p|x  |-------->|  q   |   | * | @  
+        |      |         |      |<--+
+        +------+         +------+
     
     @ = x := 5
 -}
 
-compile :: QRE Char Int -> CRA
+compile :: QRE Char Int -> CRA Char Int
 compile (Empty v) = let theta  = Data.Map.fromList [("x", v)]
                         thetaS = (\_ rs -> Data.Map.fromList [("x", v)]) -- To conform with the interface, I should unify these things
                         delta  = Data.Map.fromList [(("p", Wildcard), (thetaS, "q")),
@@ -41,11 +41,11 @@ compile (Empty v) = let theta  = Data.Map.fromList [("x", v)]
          /---\
          |   |
          |   v         
-        +-----+ a | @* +-----+
-     @  |     |------->|     |---+
-    --->|  p  |        | q|x |   | a | @* 
-        |     |<-------|     |<--+
-        +-----+ * | @* +-----+
+        +------+ a | @* +------+
+     @  |      |------->|      |---+
+    --->|  p   |        | q|x  |   | a | @* 
+        |      |<-------|      |<--+
+        +------+ * | @* +------+
 
     Where @ represents register update functions (theta) and * represents any
     character not 'a' in the alphabet (sigma).
